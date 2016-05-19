@@ -22,7 +22,7 @@ public class TestClientSocket {
 				System.out.println("请输入你想说的话：");
 				str = input.nextLine();
 				dos.writeUTF(str);
-				System.out.println("服务器萌萌哒的说：" + dis.readUTF());
+				System.out.println(dis.readUTF());
 			} while (!str.equals("88"));
 
 		} catch (Exception e) {
