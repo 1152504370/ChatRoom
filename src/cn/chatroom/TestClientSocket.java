@@ -7,8 +7,9 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class TestClientSocket {
+	static DataInputStream dis = null;
+
 	public static void main(String[] args) {
-		DataInputStream dis = null;
 		DataOutputStream dos = null;
 		Socket socket1 = null;
 		Scanner input = new Scanner(System.in);
@@ -19,10 +20,19 @@ public class TestClientSocket {
 			do {
 				dis = new DataInputStream(socket1.getInputStream());
 				dos = new DataOutputStream(socket1.getOutputStream());
+				new Thread() {
+					@Override
+					public void run() {
+						try {
+							System.out.println(dis.readUTF());
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}.start();
 				System.out.println("请输入你想说的话：");
 				str = input.nextLine();
 				dos.writeUTF(str);
-				System.out.println(dis.readUTF());
 			} while (!str.equals("88"));
 
 		} catch (Exception e) {

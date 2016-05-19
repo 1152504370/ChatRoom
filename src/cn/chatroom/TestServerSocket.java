@@ -5,9 +5,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class TestServerSocket {
+	static List<Client> clientList = new ArrayList<Client>();
 	public static void main(String[] args) {
 		Socket socket = null;
 		ServerSocket s = null;
@@ -17,7 +20,9 @@ public class TestServerSocket {
 			System.out.println("服务器已启动！");
 			while (true) {
 				socket = s.accept();
-				new TestServerSocket().new Client(socket).start();
+				Client c = new TestServerSocket().new Client(socket);
+				clientList.add(c);
+				c.start();
 			}
 		} catch (Exception e) {
 			System.out.println("Server over!");
@@ -28,7 +33,7 @@ public class TestServerSocket {
 	class Client extends Thread {
 		DataOutputStream dos = null;
 		DataInputStream dis = null;
-		Socket socket1 = null;
+		Socket socket = null;
 
 		public Client() {
 
@@ -36,20 +41,22 @@ public class TestServerSocket {
 
 		public Client(Socket socket) {
 			super();
-			this.socket1 = socket;
+			this.socket = socket;
 		}
 
 		@Override
 		public void run() {
 			try {
 				while (true) {
-					dos = new DataOutputStream(socket1.getOutputStream());
-					dis = new DataInputStream(socket1.getInputStream());
+					dos = new DataOutputStream(socket.getOutputStream());
+					dis = new DataInputStream(socket.getInputStream());
 					String str = null;
 					if ((str = dis.readUTF()) != null) {
-						System.out.println(socket1.getPort() + "说：" + str);
+						System.out.println(socket.getPort() + "说：" + str);
 					}
-					dos.writeUTF(socket1.getPort() + "说：" + str);
+					for (Client client : clientList) {
+						new DataOutputStream( client.socket.getOutputStream()).writeUTF(socket.getPort()+"说："+str);
+					}
 				}
 			} catch (Exception e) {
 				System.out.println("Server over!");
@@ -58,7 +65,7 @@ public class TestServerSocket {
 					dos.close();
 					dis.close();
 					// s.close();
-					socket1.close();
+					socket.close();
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
