@@ -1,6 +1,5 @@
 package cn.chatroom;
 
-
 import java.awt.EventQueue;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -24,6 +23,8 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JLabel;
 
 public class ClientUI extends JFrame {
 
@@ -35,9 +36,6 @@ public class ClientUI extends JFrame {
 	private static Socket socket;
 	private JScrollPane scrollPane;
 
-
-	
-
 	/**
 	 * Launch the application.
 	 */
@@ -45,7 +43,7 @@ public class ClientUI extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					socket = new Socket("127.0.0.1", 8888);
+					socket = new Socket("192.168.46.28", 8888);
 					dos = new DataOutputStream(socket.getOutputStream());
 					dis = new DataInputStream(socket.getInputStream());
 					ClientUI frame = new ClientUI();
@@ -62,11 +60,11 @@ public class ClientUI extends JFrame {
 	 */
 	public ClientUI() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 527, 380);
+		setBounds(100, 100, 344, 272);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
-		
+
 		JButton sendButton = new JButton("\u53D1\u9001");
 		sendButton.addMouseListener(new MouseAdapter() {
 			@Override
@@ -76,7 +74,7 @@ public class ClientUI extends JFrame {
 					textField.setText("");
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					// e1.printStackTrace();
 				}
 			}
 		});
@@ -84,53 +82,50 @@ public class ClientUI extends JFrame {
 		textField.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) { 
-				try {
-					if (textField.getText()!=null) {
-						dos.writeUTF(textField.getText());
-						textField.setText("");
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					try {
+						if (textField.getText() != null) {
+							dos.writeUTF(textField.getText());
+							textField.setText("");
+						}
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						// e1.printStackTrace();
 					}
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
 				}
 			}
 		});
 		textField.setColumns(10);
-		
+
 		scrollPane = new JScrollPane();
-		
-		
+
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane.setHorizontalGroup(
-			gl_contentPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
-					.addGap(38)
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 397, Short.MAX_VALUE)
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addComponent(textField, GroupLayout.PREFERRED_SIZE, 328, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(sendButton, GroupLayout.PREFERRED_SIZE, 79, GroupLayout.PREFERRED_SIZE)))
-					.addGap(117))
-		);
-		gl_contentPane.setVerticalGroup(
-			gl_contentPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_contentPane.createSequentialGroup()
-					.addGap(8)
-					.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 238, GroupLayout.PREFERRED_SIZE)
-					.addGap(18)
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(textField, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-						.addComponent(sendButton, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
-					.addContainerGap(79, Short.MAX_VALUE))
-		);
+		gl_contentPane.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_contentPane.createSequentialGroup().addGap(38)
+						.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING, false)
+								.addComponent(scrollPane, Alignment.LEADING)
+								.addGroup(gl_contentPane.createSequentialGroup()
+										.addComponent(textField, GroupLayout.PREFERRED_SIZE, 167,
+												GroupLayout.PREFERRED_SIZE)
+										.addPreferredGap(ComponentPlacement.UNRELATED).addComponent(sendButton)))
+				.addGap(473)));
+		gl_contentPane
+				.setVerticalGroup(
+						gl_contentPane.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_contentPane.createSequentialGroup().addGap(8)
+										.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 143,
+												GroupLayout.PREFERRED_SIZE)
+								.addGap(18)
+								.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+										.addComponent(sendButton, GroupLayout.PREFERRED_SIZE, 26,
+												GroupLayout.PREFERRED_SIZE)
+								.addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+										GroupLayout.PREFERRED_SIZE)).addContainerGap(109, Short.MAX_VALUE)));
 		textArea = new JTextArea();
 		scrollPane.setViewportView(textArea);
-		
-		textArea.setLineWrap(true);        //激活自动换行功能 
-		textArea.setWrapStyleWord(true);   //激活自动换行不断字功能
+
+		textArea.setLineWrap(true); // 激活自动换行功能
+		textArea.setWrapStyleWord(true);
 		textArea.addCaretListener(new CaretListener() {
 			public void caretUpdate(CaretEvent e) {
 				new Thread() {
@@ -140,10 +135,10 @@ public class ClientUI extends JFrame {
 						try {
 							while (true) {
 								if ((s = dis.readUTF()) != null)
-									textArea.setText(textArea.getText()+s+"\r\n");
+									textArea.setText(textArea.getText() + s + "\r\n");
 							}
 						} catch (IOException e) {
-							//e.printStackTrace();
+							// e.printStackTrace();
 						}
 					}
 				}.start();

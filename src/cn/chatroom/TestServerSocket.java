@@ -11,6 +11,7 @@ import java.util.Scanner;
 
 public class TestServerSocket {
 	static List<Client> clientList = new ArrayList<Client>();
+
 	public static void main(String[] args) {
 		Socket socket = null;
 		ServerSocket s = null;
@@ -27,7 +28,7 @@ public class TestServerSocket {
 		} catch (Exception e) {
 			System.out.println("Server over!");
 		}
-        input.close();
+		input.close();
 	}
 
 	class Client extends Thread {
@@ -47,25 +48,25 @@ public class TestServerSocket {
 		@Override
 		public void run() {
 			try {
-				while (true) {
+				String str = null;
+				do {
 					dos = new DataOutputStream(socket.getOutputStream());
 					dis = new DataInputStream(socket.getInputStream());
-					String str = null;
 					if ((str = dis.readUTF()) != null) {
 						System.out.println(socket.getPort() + "说：" + str);
 					}
 					for (Client client : clientList) {
-						new DataOutputStream( client.socket.getOutputStream()).writeUTF(socket.getPort()+"说："+str);
+						new DataOutputStream(client.socket.getOutputStream()).writeUTF(socket.getPort() + "说：" + str);
 					}
-				}
+				} while (!str.equals("88"));
 			} catch (Exception e) {
-				System.out.println("Server over!");
+				System.out.println("客户端" + socket.getPort() + "已退出!");
+				clientList.remove(this);
 			} finally {
 				try {
 					dos.close();
-					dis.close();
-					// s.close();
 					socket.close();
+					dis.close();
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
