@@ -27,7 +27,7 @@ public class TestServerSocket {
 		} catch (Exception e) {
 			System.out.println("Server over!");
 		}
-
+        input.close();
 	}
 
 	class Client extends Thread {
