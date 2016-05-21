@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -24,6 +25,8 @@ public class TestServerSocket {
 				Client c = new Client(socket);
 				clientList.add(c);
 				c.start();
+				//发送用户列表
+				updateUserList();
 			}
 		} catch (Exception e) {
 			System.out.println("Server over!");
@@ -44,6 +47,7 @@ public class TestServerSocket {
 		public Client(Socket socket) {
 			super();
 			this.socket = socket;
+			name ="用户："+socket.getPort();
 		}
 
 		@Override
@@ -56,7 +60,7 @@ public class TestServerSocket {
 					if ((str = dis.readUTF()) != null) {
 						if (str.startsWith("#")) {
 							this.name = str.substring(1);
-//							str = /* “您的好友 " + */ this.name + " 已上线！";
+							updateUserList();
 						}
 						if (this.name != null) {
 							System.out.println(this.name + "：" + str);
@@ -65,15 +69,9 @@ public class TestServerSocket {
 						}
 					}
 					if (!str.startsWith("#")) {
-						for (Client client : clientList) {
-							if (this.name != null) {
-								new DataOutputStream(client.socket.getOutputStream()).writeUTF(this.name + "：" + str);
-							} else {
-								new DataOutputStream(client.socket.getOutputStream())
-										.writeUTF(socket.getPort() + "：" + str);
-							}
-						}
+						sendmsg(socket, name, str);
 					}
+					
 				} while (!str.equals("88"));
 			} catch (Exception e) {
 			} finally {
@@ -84,6 +82,7 @@ public class TestServerSocket {
 						System.out.println("客户端" + socket.getPort() + "已退出聊天室!");
 					}
 					clientList.remove(this);
+					updateUserList();
 					dos.close();
 					socket.close();
 					dis.close();
@@ -95,6 +94,34 @@ public class TestServerSocket {
 		}
 	}
 
+	public void sendmsg(Socket socket, String name, String str) throws IOException {
+		for (Client client : clientList) {
+			if (name != null) {
+				new DataOutputStream(client.socket.getOutputStream()).writeUTF(name + "：" + str);
+			} else {
+				new DataOutputStream(client.socket.getOutputStream()).writeUTF(socket.getPort() + "：" + str);
+			}
+		}
+	}
+   public String getName(){
+	   String str=",";
+	   for (Client cc : clientList) {
+		str+=cc.name+",";
+	}
+	return str;
+	   
+   }
+   public void updateUserList(){
+	   String userstr[] = getName().split(",");
+	   for (Client client : clientList) {
+		   try {
+			new DataOutputStream(client.socket.getOutputStream()).writeUTF(getName());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+   }
 	public static void main(String[] args) {
 		TestServerSocket t = new TestServerSocket();
 		t.niit();

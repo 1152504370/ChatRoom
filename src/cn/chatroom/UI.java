@@ -1,34 +1,33 @@
 package cn.chatroom;
 
+import java.awt.Color;
 import java.awt.EventQueue;
-import java.awt.TextArea;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+import javax.swing.DefaultListModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.border.EmptyBorder;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import javax.swing.JScrollPane;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.Color;
-import java.awt.SystemColor;
 import javax.swing.UIManager;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JLabel;
+import javax.swing.border.EmptyBorder;
+import java.awt.SystemColor;
 
 public class UI extends JFrame {
 
@@ -39,7 +38,9 @@ public class UI extends JFrame {
 	DataInputStream dis;
 	DataOutputStream dos;
 	private Socket socket;
-	private JTextField sendName;
+	private JTextField nameText;
+	JList<String> userList = new JList<String>();
+	
 
 	/**
 	 * Launch the application.
@@ -74,7 +75,11 @@ public class UI extends JFrame {
 				try {
 					while (true) {
 						if ((s = dis.readUTF()) != null)
-							textArea.append(s + "\r\n");
+							if (s.startsWith(",")) {
+								updateList(s);
+							} else {
+								textArea.append(s + "\r\n");
+							}
 					}
 				} catch (IOException e) {
 					// e.printStackTrace();
@@ -94,12 +99,20 @@ public class UI extends JFrame {
 			e.printStackTrace();
 		}
 	}
+	public void updateList(String s){
+		String userName[] = s.split(",");
+		DefaultListModel<String> dml = new DefaultListModel<String>();
+		for (int i = 1; i < userName.length-1; i++) {
+			dml.addElement(userName[i]);
+		}
+		userList.setModel(dml);
+	}
 
 	/**
 	 * Create the frame.
 	 */
 	public UI() {
-		setBackground(SystemColor.inactiveCaption);
+		setBackground(new Color(255, 255, 255));
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -116,7 +129,7 @@ public class UI extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 486, 358);
 		contentPane = new JPanel();
-		contentPane.setBackground(Color.WHITE);
+		contentPane.setBackground(new Color(255, 255, 255));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 
@@ -126,9 +139,10 @@ public class UI extends JFrame {
 				sendmsg(sendText);
 			}
 		});
-		sendText.setBackground(Color.WHITE);
+		sendText.setBackground(SystemColor.textHighlightText);
 		sendText.setColumns(10);
 		JButton sendButton = new JButton("\u53D1\u9001");
+		sendButton.setBackground(UIManager.getColor("Button.highlight"));
 		sendButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -139,57 +153,82 @@ public class UI extends JFrame {
 		JScrollPane scrollPane = new JScrollPane();
 
 		JLabel name = new JLabel("\u6635\u79F0\uFF1A");
+		name.setBackground(new Color(240, 128, 128));
 
-		sendName = new JTextField();
-		sendName.addActionListener(new ActionListener() {
+		nameText = new JTextField();
+		nameText.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				sendName.setText(sendName.getText() + "#");
-				sendmsg(sendName);
+				nameText.setText("#" + nameText.getText());
+				String myName = nameText.getText().substring(1);
+				sendmsg(nameText);
+				nameText.setText(myName);
+
 			}
 		});
-		sendName.setColumns(10);
+		nameText.setColumns(10);
 
 		JButton sendNameButton = new JButton("\u63D0\u4EA4");
+		sendNameButton.setBackground(UIManager.getColor("Button.darkShadow"));
 		sendNameButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				sendName.setText("#"+sendName.getText());
-				sendmsg(sendName);
+				nameText.setText("#" + nameText.getText());
+				String myName = nameText.getText().substring(1);
+				sendmsg(nameText);
+				nameText.setText(myName);
 			}
 		});
+
+		
+		
+		userList.setBackground(new Color(230, 230, 250));
+
+		JLabel lblNewLabel = new JLabel("\u5728\u7EBF\u7528\u6237:");
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_contentPane.createSequentialGroup().addContainerGap()
-						.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-								.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 281, GroupLayout.PREFERRED_SIZE)
+		gl_contentPane.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(gl_contentPane
+				.createSequentialGroup().addContainerGap()
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_contentPane.createSequentialGroup()
 								.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 										.addGroup(gl_contentPane.createSequentialGroup()
-												.addComponent(sendText, GroupLayout.PREFERRED_SIZE, 218,
+												.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 281,
 														GroupLayout.PREFERRED_SIZE)
-												.addGap(3).addComponent(sendButton))
-										.addGroup(gl_contentPane.createSequentialGroup().addGap(2)
-												.addComponent(name, GroupLayout.PREFERRED_SIZE, 41,
-														GroupLayout.PREFERRED_SIZE)
-												.addGap(10)
-												.addComponent(sendName, GroupLayout.PREFERRED_SIZE, 163,
-														GroupLayout.PREFERRED_SIZE)
-												.addPreferredGap(ComponentPlacement.RELATED)
-												.addComponent(sendNameButton))))
-						.addGap(169)));
-		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING).addGroup(gl_contentPane
-				.createSequentialGroup()
-				.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_contentPane.createSequentialGroup().addGap(19).addComponent(sendNameButton))
-						.addGroup(gl_contentPane.createSequentialGroup().addGap(21).addComponent(sendName,
+												.addGap(18)
+												.addComponent(userList, GroupLayout.DEFAULT_SIZE, 124, Short.MAX_VALUE))
+								.addGroup(Alignment.TRAILING,
+										gl_contentPane.createSequentialGroup()
+												.addComponent(sendText, GroupLayout.DEFAULT_SIZE, 365, Short.MAX_VALUE)
+												.addGap(18).addComponent(sendButton)))
+								.addContainerGap())
+						.addGroup(
+								gl_contentPane.createSequentialGroup().addGap(2)
+										.addComponent(name, GroupLayout.PREFERRED_SIZE, 41, GroupLayout.PREFERRED_SIZE)
+										.addGap(10)
+										.addComponent(nameText, GroupLayout.PREFERRED_SIZE, 163,
+												GroupLayout.PREFERRED_SIZE)
+										.addPreferredGap(ComponentPlacement.RELATED).addComponent(sendNameButton)
+										.addGap(18).addComponent(lblNewLabel).addGap(99)))));
+		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_contentPane.createSequentialGroup()
+						.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_contentPane.createSequentialGroup().addGap(19)
+										.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+												.addComponent(sendNameButton).addComponent(lblNewLabel)))
+						.addGroup(gl_contentPane.createSequentialGroup().addGap(21).addComponent(nameText,
 								GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 						.addGroup(gl_contentPane.createSequentialGroup().addGap(23).addComponent(name)))
-				.addGap(17).addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 198, GroupLayout.PREFERRED_SIZE)
-				.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_contentPane.createSequentialGroup().addGap(16).addComponent(sendButton))
-						.addGroup(gl_contentPane.createSequentialGroup().addGap(18).addComponent(sendText,
-								GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-				.addGap(21)));
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING, false)
+						.addGroup(gl_contentPane.createSequentialGroup().addGap(17).addComponent(scrollPane,
+								GroupLayout.PREFERRED_SIZE, 198, GroupLayout.PREFERRED_SIZE))
+						.addGroup(gl_contentPane.createSequentialGroup().addPreferredGap(ComponentPlacement.UNRELATED)
+								.addComponent(userList, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+										Short.MAX_VALUE)))
+				.addGap(18)
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(sendText,
+						GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(sendButton)).addGap(21)));
 
 		textArea = new JTextArea();
+		textArea.setEditable(false);
 		textArea.setBackground(Color.WHITE);
 		scrollPane.setViewportView(textArea);
 		textArea.setLineWrap(true); // 激活自动换行功能
