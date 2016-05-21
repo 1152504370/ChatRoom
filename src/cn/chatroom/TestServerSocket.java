@@ -54,29 +54,35 @@ public class TestServerSocket {
 					dos = new DataOutputStream(socket.getOutputStream());
 					dis = new DataInputStream(socket.getInputStream());
 					if ((str = dis.readUTF()) != null) {
-						if (str.endsWith("#")) {
-							this.name = str.substring(0, str.indexOf("#"));
-							str = "大家好！我叫" + str.substring(0, str.indexOf("#"));
+						if (str.startsWith("#")) {
+							this.name = str.substring(1);
+//							str = /* “您的好友 " + */ this.name + " 已上线！";
 						}
 						if (this.name != null) {
-							System.out.println(name + "：" + str);
+							System.out.println(this.name + "：" + str);
 						} else {
 							System.out.println(socket.getPort() + "：" + str);
 						}
 					}
-					for (Client client : clientList) {
-						if (this.name != null) {
-							new DataOutputStream(client.socket.getOutputStream()).writeUTF(this.name + "：" + str);
-						} else {
-							System.out.println(socket.getPort() + "：" + str);
+					if (!str.startsWith("#")) {
+						for (Client client : clientList) {
+							if (this.name != null) {
+								new DataOutputStream(client.socket.getOutputStream()).writeUTF(this.name + "：" + str);
+							} else {
+								new DataOutputStream(client.socket.getOutputStream())
+										.writeUTF(socket.getPort() + "：" + str);
+							}
 						}
 					}
-
 				} while (!str.equals("88"));
 			} catch (Exception e) {
 			} finally {
 				try {
-					System.out.println("客户端" + socket.getPort() + "已退出!");
+					if (this.name != null) {
+						System.out.println(this.name + "已退出聊天室!");
+					} else {
+						System.out.println("客户端" + socket.getPort() + "已退出聊天室!");
+					}
 					clientList.remove(this);
 					dos.close();
 					socket.close();
