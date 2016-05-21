@@ -15,16 +15,13 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JLabel;
 
 public class ClientUI extends JFrame {
 
@@ -59,8 +56,9 @@ public class ClientUI extends JFrame {
 	 * Create the frame.
 	 */
 	public ClientUI() {
+		setTitle("\u804A\u5929\u5BA4");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 344, 272);
+		setBounds(100, 100, 367, 257);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -70,7 +68,16 @@ public class ClientUI extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				try {
-					dos.writeUTF(textField.getText());
+					if (textField.getText() != null) {
+						dos.writeUTF(textField.getText());
+						// textField.setText("");
+					}
+					if (textField.getText().equals("88")) {
+						textArea.setText(textArea.getText() + "客户端已退出!" + "\r\n");
+						dos.close();
+						socket.close();
+						dis.close();
+					}
 					textField.setText("");
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
@@ -81,46 +88,53 @@ public class ClientUI extends JFrame {
 		textField = new JTextField();
 		textField.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+			public void keyPressed(KeyEvent VK_ENTER) {
 					try {
 						if (textField.getText() != null) {
 							dos.writeUTF(textField.getText());
-							textField.setText("");
+							 textField.setText("");
 						}
+						if (textField.getText().equals("88")) {
+							textArea.setText(textArea.getText() + "客户端已退出!" + "\r\n");
+							dos.close();
+							socket.close();
+							dis.close();
+						}
+						textField.setText("");
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						// e1.printStackTrace();
 					}
 				}
-			}
 		});
 		textField.setColumns(10);
 
 		scrollPane = new JScrollPane();
 
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_contentPane.createSequentialGroup().addGap(38)
-						.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING, false)
-								.addComponent(scrollPane, Alignment.LEADING)
-								.addGroup(gl_contentPane.createSequentialGroup()
-										.addComponent(textField, GroupLayout.PREFERRED_SIZE, 167,
-												GroupLayout.PREFERRED_SIZE)
-										.addPreferredGap(ComponentPlacement.UNRELATED).addComponent(sendButton)))
-				.addGap(473)));
-		gl_contentPane
-				.setVerticalGroup(
-						gl_contentPane.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_contentPane.createSequentialGroup().addGap(8)
-										.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 143,
-												GroupLayout.PREFERRED_SIZE)
-								.addGap(18)
-								.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-										.addComponent(sendButton, GroupLayout.PREFERRED_SIZE, 26,
-												GroupLayout.PREFERRED_SIZE)
-								.addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-										GroupLayout.PREFERRED_SIZE)).addContainerGap(109, Short.MAX_VALUE)));
+		gl_contentPane.setHorizontalGroup(
+			gl_contentPane.createParallelGroup(Alignment.TRAILING)
+				.addGroup(Alignment.LEADING, gl_contentPane.createSequentialGroup()
+					.addGap(22)
+					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_contentPane.createSequentialGroup()
+							.addComponent(textField, GroupLayout.PREFERRED_SIZE, 213, GroupLayout.PREFERRED_SIZE)
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addComponent(sendButton))
+						.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 276, GroupLayout.PREFERRED_SIZE))
+					.addContainerGap(87, Short.MAX_VALUE))
+		);
+		gl_contentPane.setVerticalGroup(
+			gl_contentPane.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_contentPane.createSequentialGroup()
+					.addGap(8)
+					.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 143, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+						.addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(sendButton, GroupLayout.PREFERRED_SIZE, 26, GroupLayout.PREFERRED_SIZE))
+					.addContainerGap(18, Short.MAX_VALUE))
+		);
 		textArea = new JTextArea();
 		scrollPane.setViewportView(textArea);
 

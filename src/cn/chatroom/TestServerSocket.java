@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Scanner;
 
 public class TestServerSocket {
-	static List<Client> clientList = new ArrayList<Client>();
+	List<Client> clientList = new ArrayList<Client>();
 
-	public static void main(String[] args) {
+	public void niit() {
 		Socket socket = null;
 		ServerSocket s = null;
 		Scanner input = new Scanner(System.in);
@@ -21,7 +21,7 @@ public class TestServerSocket {
 			System.out.println("服务器已启动！");
 			while (true) {
 				socket = s.accept();
-				Client c = new TestServerSocket().new Client(socket);
+				Client c = new Client(socket);
 				clientList.add(c);
 				c.start();
 			}
@@ -32,9 +32,10 @@ public class TestServerSocket {
 	}
 
 	class Client extends Thread {
-		DataOutputStream dos = null;
-		DataInputStream dis = null;
-		Socket socket = null;
+		DataOutputStream dos;
+		DataInputStream dis;
+		Socket socket;
+		String name;
 
 		public Client() {
 
@@ -53,17 +54,30 @@ public class TestServerSocket {
 					dos = new DataOutputStream(socket.getOutputStream());
 					dis = new DataInputStream(socket.getInputStream());
 					if ((str = dis.readUTF()) != null) {
-						System.out.println(socket.getPort() + "说：" + str);
+						if (str.endsWith("#")) {
+							this.name = str.substring(0, str.indexOf("#"));
+							str = "大家好！我叫" + str.substring(0, str.indexOf("#"));
+						}
+						if (this.name != null) {
+							System.out.println(name + "：" + str);
+						} else {
+							System.out.println(socket.getPort() + "：" + str);
+						}
 					}
 					for (Client client : clientList) {
-						new DataOutputStream(client.socket.getOutputStream()).writeUTF(socket.getPort() + "说：" + str);
+						if (this.name != null) {
+							new DataOutputStream(client.socket.getOutputStream()).writeUTF(this.name + "：" + str);
+						} else {
+							System.out.println(socket.getPort() + "：" + str);
+						}
 					}
+
 				} while (!str.equals("88"));
 			} catch (Exception e) {
-				System.out.println("客户端" + socket.getPort() + "已退出!");
-				clientList.remove(this);
 			} finally {
 				try {
+					System.out.println("客户端" + socket.getPort() + "已退出!");
+					clientList.remove(this);
 					dos.close();
 					socket.close();
 					dis.close();
@@ -73,5 +87,10 @@ public class TestServerSocket {
 
 			}
 		}
+	}
+
+	public static void main(String[] args) {
+		TestServerSocket t = new TestServerSocket();
+		t.niit();
 	}
 }
