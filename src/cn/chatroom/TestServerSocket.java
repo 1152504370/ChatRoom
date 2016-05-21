@@ -47,14 +47,14 @@ public class TestServerSocket {
 		public Client(Socket socket) {
 			super();
 			this.socket = socket;
-			name ="用户："+socket.getPort();
+			name ="用户"+socket.getPort();
 		}
 
 		@Override
 		public void run() {
 			try {
 				String str = null;
-				do {
+				while(true){
 					dos = new DataOutputStream(socket.getOutputStream());
 					dis = new DataInputStream(socket.getInputStream());
 					if ((str = dis.readUTF()) != null) {
@@ -62,7 +62,7 @@ public class TestServerSocket {
 							this.name = str.substring(1);
 							updateUserList();
 						}
-						if (this.name != null) {
+						if (!this.name.startsWith("用户")) {
 							System.out.println(this.name + "：" + str);
 						} else {
 							System.out.println(socket.getPort() + "：" + str);
@@ -72,15 +72,11 @@ public class TestServerSocket {
 						sendmsg(socket, name, str);
 					}
 					
-				} while (!str.equals("88"));
+				}
 			} catch (Exception e) {
 			} finally {
 				try {
-					if (this.name != null) {
 						System.out.println(this.name + "已退出聊天室!");
-					} else {
-						System.out.println("客户端" + socket.getPort() + "已退出聊天室!");
-					}
 					clientList.remove(this);
 					updateUserList();
 					dos.close();
@@ -96,11 +92,7 @@ public class TestServerSocket {
 
 	public void sendmsg(Socket socket, String name, String str) throws IOException {
 		for (Client client : clientList) {
-			if (name != null) {
 				new DataOutputStream(client.socket.getOutputStream()).writeUTF(name + "：" + str);
-			} else {
-				new DataOutputStream(client.socket.getOutputStream()).writeUTF(socket.getPort() + "：" + str);
-			}
 		}
 	}
    public String getName(){
